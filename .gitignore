@@ -79,3 +79,5 @@ docs/venv
 docker-db
 *.iml
 docker-compose.override.yml
+
+node_modules/

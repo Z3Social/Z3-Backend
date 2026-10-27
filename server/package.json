@@ -1,0 +1,12 @@
+{
+  "name": "z3-backend-devserver",
+  "version": "1.0.0",
+  "description": "ZЗ Social Development & Testing API Server",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js --z3-ui"
+  },
+  "dependencies": {
+    "express": "^4.18.2"
+  }
+}
