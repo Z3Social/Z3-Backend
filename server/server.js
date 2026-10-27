@@ -37,10 +37,10 @@ const MEDIA_DIR = fs.existsSync(path.join(PUBLIC_DIR, 'media'))
       ? path.join(__dirname, '..', 'public', 'media')
       : path.join(__dirname, '..', 'public', 'media'));
 const Z3_DIST_DIR = [
-  path.join(__dirname, '..', '..', 'Z3-UI', 'dist'),
   path.join(__dirname, '..', '..', 'Z3-UI', 'static'),
+  path.join(__dirname, '..', '..', 'Z3-UI', 'dist'),
   path.join(__dirname, '..', '..', 'dist')
-].find((p) => fs.existsSync(p)) || path.join(__dirname, '..', '..', 'Z3-UI', 'dist');
+].find((p) => fs.existsSync(p)) || path.join(__dirname, '..', '..', 'Z3-UI', 'static');
 const UPLOAD_DIR = path.join(__dirname, '..', 'data', 'uploads');
 fs.mkdirSync(UPLOAD_DIR, { recursive: true });
 
@@ -2237,8 +2237,8 @@ const getNodeInfo = (req, res) => {
   res.json({
     version: '2.1',
     software: {
-      name: 'mastodon',
-      version: '4.2.0',
+      name: 'akkoma',
+      version: '3.10.4',
       repository: 'https://github.com/Z3Social/Z3-UI'
     },
     protocols: ['activitypub'],
@@ -2276,7 +2276,7 @@ app.get('/api/v1/instance', (req, res) => {
     short_description: 'Radically decentralized social network',
     description: 'ZЗ Social is a next-generation decentralized social network built on a distinct community architecture.',
     email: 'admin@z3.social',
-    version: '4.2.0 (compatible; Mastodon 4.2.0)',
+    version: '2.7.2 (compatible; Akkoma 3.10.4-0-g1234567-z3)',
     languages: ['en'],
     registrations: true,
     approval_required: false,
@@ -2357,6 +2357,16 @@ app.post('/api/v1/apps', (req, res) => {
 app.post(
   '/oauth/token',
   wrap((req, res) => {
+    const grantType = req.body.grant_type || 'password';
+    if (grantType === 'client_credentials') {
+      return res.json({
+        access_token: 'z3_client_app_token',
+        token_type: 'Bearer',
+        scope: req.body.scope || 'read write follow push',
+        created_at: Math.floor(Date.now() / 1000)
+      });
+    }
+
     const rawLogin = cleanText(req.body.username || req.body.login, 200).trim().toLowerCase().replace(/^@/, '');
     const cleanHandle = rawLogin.replace(/@(z3\.social|localhost(:\d+)?)$/i, '');
     const u = db().users.find((x) =>
