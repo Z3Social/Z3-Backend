@@ -170,6 +170,7 @@ function publicUser(u, viewer) {
     displayName: u.displayName,
     avatar: u.avatar || '',
     role: u.role,
+    verified: !!u.verified,
   };
   if (viewer !== undefined) {
     const priv = u.settings && u.settings.privacy === 'private';
@@ -1934,6 +1935,7 @@ function userToAccount(u) {
     following_count: followingCount,
     statuses_count: statusesCount,
     last_status_at: u.createdAt ? u.createdAt.slice(0, 10) : '2026-10-26',
+    verified: !!u.verified,
     emojis: [],
     fields: [],
     pleroma: {
@@ -1941,6 +1943,7 @@ function userToAccount(u) {
       is_moderator: u.role === 'owner' || u.role === 'moderator',
       hide_followers_count: false,
       hide_follows_count: false,
+      tags: u.verified ? ['verified'] : [],
       settings_store: {}
     }
   };

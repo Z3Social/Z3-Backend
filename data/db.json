@@ -112,7 +112,7 @@
       "description": "Welcome to the group! You can connect with other members, get updates and share videos.",
       "cover": "/uploads/ray-william-johnson-cover.jpg",
       "category": "General",
-      "privacy": "public",
+      "privacy": "hidden",
       "visible": false,
       "hasFiles": true,
       "createdAt": "2024-11-27T21:19:08.000Z",
@@ -142,7 +142,8 @@
           "title": "=3 Fan Community",
           "text": "Discussions, memes, and classic episode throwbacks from Ray William Johnson."
         }
-      ]
+      ],
+      "visibility": "hidden"
     },
     {
       "id": "6d8bd2d7-f227-475b-bfe0-77838734f4e5",
