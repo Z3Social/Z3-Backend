@@ -425,7 +425,9 @@
         }
       ],
       "poll": null,
-      "reactions": {},
+      "reactions": {
+        "like": []
+      },
       "createdAt": "2026-10-24T13:50:44.549Z",
       "editedAt": null,
       "pinned": false,
@@ -673,9 +675,9 @@
       "userId": "6aa0c37b-9344-4484-81d3-1707bbaa1a25",
       "createdAt": 1793072177117
     },
-    "da9d7c81865d55f92fbc7487b151c0e0fc5de284ecedb079bf471174d147fe62": {
+    "2adeff7b87245741220ab3e46da152dbf9b50e4a33c9e763891dea49b268109c": {
       "userId": "6aa0c37b-9344-4484-81d3-1707bbaa1a25",
-      "createdAt": 1793125544770
+      "createdAt": 1793217173130
     }
   }
 }
