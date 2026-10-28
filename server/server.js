@@ -2783,6 +2783,76 @@ app.get('/api/v1/groups/:id', (req, res) => {
   res.json(formatCommunity(g, req.user ? req.user.id : null));
 });
 
+app.post('/api/v1/groups', parseBodyOrMultipart, wrap((req, res) => {
+  const u = requireUser(req);
+  const name = cleanText(req.body.title || req.body.name, 80).trim();
+  if (!name) fail(400, 'Give your group a name.');
+  const description = cleanText(req.body.description, 2000).trim() || 'Welcome to the group!';
+  let coverImage = cleanText(req.body.cover || req.body.cover_image, 500);
+  if (req.files && (req.files.cover_image || req.files.cover)) {
+    const file = req.files.cover_image || req.files.cover;
+    const mediaId = crypto.randomUUID();
+    const mediaObj = {
+      id: mediaId,
+      url: `/uploads/${mediaId}_${file.name || 'cover.jpg'}`,
+      type: 'image',
+      description: name
+    };
+    mediaUploads.set(mediaId, mediaObj);
+    coverImage = mediaObj.url;
+  }
+  const priv = ['public', 'private', 'hidden'].includes(req.body.privacy) ? req.body.privacy : 'public';
+  const g = {
+    id: store.uid(),
+    slug: slugify(name),
+    name,
+    category: cleanText(req.body.category, 50).trim() || 'General',
+    description,
+    cover: coverImage || '/media/z3-central-cover.jpg',
+    coverImage: coverImage || '/media/z3-central-cover.jpg',
+    privacy: priv,
+    visible: priv !== 'hidden',
+    hasFiles: !!req.body.hasFiles,
+    createdAt: now(),
+    createdBy: u.id,
+    creatorId: u.id,
+    members: [{ userId: u.id, role: 'admin', joinedAt: now() }],
+    requests: [],
+    pinnedPostId: null,
+    lastActivity: now(),
+  };
+  db().groups.push(g);
+  store.save();
+  res.json(formatCommunity(g, u.id));
+}));
+
+app.put('/api/v1/groups/:id', parseBodyOrMultipart, wrap((req, res) => {
+  const u = requireUser(req);
+  const g = groupById(req.params.id) || groupBySlug(req.params.id) || fail(404, 'Group not found');
+  if (!groupAdmin(g, u) && !isOwner(u)) fail(403, 'Not allowed to edit group.');
+  if (req.body.title || req.body.name) {
+    g.name = cleanText(req.body.title || req.body.name, 80).trim() || g.name;
+  }
+  if (req.body.description !== undefined) {
+    g.description = cleanText(req.body.description, 2000).trim();
+  }
+  if (req.files && (req.files.cover_image || req.files.cover)) {
+    const file = req.files.cover_image || req.files.cover;
+    const mediaId = crypto.randomUUID();
+    const mediaObj = {
+      id: mediaId,
+      url: `/uploads/${mediaId}_${file.name || 'cover.jpg'}`,
+      type: 'image',
+      description: g.name
+    };
+    mediaUploads.set(mediaId, mediaObj);
+    g.cover = mediaObj.url;
+    g.coverImage = mediaObj.url;
+  }
+  store.save();
+  res.json(formatCommunity(g, u.id));
+}));
+
 // Media uploads cache / memory store
 const mediaUploads = new Map();
 
