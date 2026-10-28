@@ -2690,6 +2690,8 @@ function formatCommunity(g, viewerId) {
     })
     .filter(Boolean);
 
+  const vis = g.visibility || (g.privacy === 'hidden' || !g.visible ? 'hidden' : (g.privacy === 'private' ? 'private' : 'public'));
+
   return {
     id: g.id,
     title: g.name,
@@ -2706,6 +2708,8 @@ function formatCommunity(g, viewerId) {
     cover_image_url: g.coverImage || g.cover || '/media/z3-central-cover.jpg',
     member_count: (g.members || []).length,
     members_count: (g.members || []).length,
+    visibility: vis,
+    privacy: vis,
     is_member: isMember,
     is_admin: isAdmin,
     moderators: mods,
@@ -2801,7 +2805,8 @@ app.post('/api/v1/groups', parseBodyOrMultipart, wrap((req, res) => {
     mediaUploads.set(mediaId, mediaObj);
     coverImage = mediaObj.url;
   }
-  const priv = ['public', 'private', 'hidden'].includes(req.body.privacy) ? req.body.privacy : 'public';
+  const rawPriv = req.body.visibility || req.body.privacy;
+  const priv = ['public', 'private', 'hidden'].includes(rawPriv) ? rawPriv : 'public';
   const g = {
     id: store.uid(),
     slug: slugify(name),
@@ -2811,6 +2816,7 @@ app.post('/api/v1/groups', parseBodyOrMultipart, wrap((req, res) => {
     cover: coverImage || '/media/z3-central-cover.jpg',
     coverImage: coverImage || '/media/z3-central-cover.jpg',
     privacy: priv,
+    visibility: priv,
     visible: priv !== 'hidden',
     hasFiles: !!req.body.hasFiles,
     createdAt: now(),
@@ -2835,6 +2841,12 @@ app.put('/api/v1/groups/:id', parseBodyOrMultipart, wrap((req, res) => {
   }
   if (req.body.description !== undefined) {
     g.description = cleanText(req.body.description, 2000).trim();
+  }
+  const rawVisibility = req.body.visibility || req.body.privacy;
+  if (rawVisibility && ['public', 'private', 'hidden'].includes(rawVisibility)) {
+    g.visibility = rawVisibility;
+    g.privacy = rawVisibility;
+    g.visible = rawVisibility !== 'hidden';
   }
   if (req.files && (req.files.cover_image || req.files.cover)) {
     const file = req.files.cover_image || req.files.cover;
